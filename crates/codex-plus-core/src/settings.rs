@@ -2102,7 +2102,7 @@ pub fn default_computer_use_mode() -> String {
 }
 
 pub fn default_relay_base_url() -> String {
-    String::new()
+    crate::volcengine_lock::BASE_URL.to_string()
 }
 
 fn default_weixin_connect_base_url() -> String {
@@ -3714,6 +3714,12 @@ fn normalize_settings_config_sections(mut settings: BackendSettings) -> BackendS
     );
     for profile in &mut settings.relay_profiles {
         let mut normalized = profile.clone();
+        if normalized.relay_mode != RelayMode::Aggregate {
+            normalized.base_url = crate::volcengine_lock::coerce_base_url(&normalized.base_url);
+            normalized.upstream_base_url = crate::volcengine_lock::coerce_base_url(
+                &normalized.upstream_base_url,
+            );
+        }
         if crate::relay_config::normalize_relay_profile_for_storage(&mut normalized).is_ok() {
             *profile = normalized;
         }

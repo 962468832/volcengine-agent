@@ -1,4 +1,4 @@
-# Codex++
+# Volcengine Agent
 
 <p align="center">
   <img src="docs/images/codex-plus-plus.png" alt="Codex++ icon" width="160">
@@ -16,9 +16,9 @@
   <img alt="Tauri" src="https://img.shields.io/badge/tauri-2.x-24C8DB">
 </p>
 
-Codex++ is a unified manager for AI coding agents, built on an everything-is-an-extension architecture: UI, commands, tools for the model, agent-loop hooks, and the requests and replies sent to models can all be taken over by extensions. No code required: say “turn the send button into a dog” in a Codex chat and the agent writes the extension, hot-reloads it, and confirms with a screenshot.
+Volcengine Agent is a CodexPlusPlus based desktop client customized for the `api.volcengine.org` relay. The provider UI exposes only this relay, and the network layer rejects other remote API hosts.
 
-It also ships a local gateway: Codex, Claude Code, Gemini CLI, OpenCode, Zed, and 50+ other agents share one provider pool, requests are routed by model name, and traffic moves to the next provider automatically when a key cools down or a provider trips. ChatGPT, GitHub Copilot, Cursor, and other subscriptions can be signed in to the pool as well. The original direct mode (official login, official login + API, pure API, aggregate providers) is fully preserved, and Codex switches between **Via gateway** and **Direct** with one click.
+The release workflow downloads the matching OpenAI Codex CLI and bundles it into the installer, so the app is ready after installation. Enter your Volcengine relay API key and model name to start.
 
 There is also session management, Codex UI enhancements, an enhanced Claude Desktop copy, Computer Use sharing across agents, and sub-agent collaboration. The manager looks like a desktop app: the sidebar picks the agent and page, tabs along the top switch sub-pages, and the gear opens a settings directory. If you only use Codex, or only want the enhancements, a usage mode hides the pages you don't need. Double-click to open its window and launch each app from there. It never modifies any official app's installation files.
 

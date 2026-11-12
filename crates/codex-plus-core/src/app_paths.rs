@@ -497,6 +497,27 @@ pub fn find_standalone_codex_cli() -> Option<PathBuf> {
     )
 }
 
+/// Finds the Codex CLI bundled inside the Volcengine Agent package.
+pub fn find_packaged_codex_cli() -> Option<PathBuf> {
+    let executable = std::env::current_exe().ok()?;
+    let parent = executable.parent()?;
+    let candidates = if cfg!(target_os = "macos") {
+        vec![parent.join("../Resources/codex")]
+    } else if cfg!(windows) {
+        vec![parent.join("resources/codex.exe"), parent.join("codex.exe")]
+    } else {
+        vec![
+            parent.join("resources/codex"),
+            parent.join("../resources/codex"),
+            parent.join("../lib/codex-plus-plus/resources/codex"),
+        ]
+    };
+    candidates
+        .into_iter()
+        .map(|path| path.canonicalize().ok().unwrap_or(path))
+        .find(|path| path.is_file())
+}
+
 fn find_standalone_codex_cli_in(bin_dir: &Path) -> Option<PathBuf> {
     let mut candidates = Vec::new();
     if let Some(path) = standalone_cli_in_dir(bin_dir) { candidates.push(path); }

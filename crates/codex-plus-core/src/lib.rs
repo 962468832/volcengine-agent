@@ -107,6 +107,7 @@ pub mod ssh_remote_loopback;
 pub mod status;
 pub mod stepwise;
 pub mod newapi;
+pub mod volcengine_lock;
 pub mod sub2api;
 pub mod tools;
 pub mod update;

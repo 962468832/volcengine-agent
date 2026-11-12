@@ -1658,18 +1658,18 @@ const defaultSettings: BackendSettings = {
   weixinConnectProjectId: "",
   weixinConnectSandbox: "read-only",
   weixinConnectCodexPath: "",
-  relayBaseUrl: "",
+  relayBaseUrl: "https://api.volcengine.org/v1",
   relayApiKey: "",
   relayProfiles: [
     {
       id: "default",
-      name: t("默认中转"),
+      name: "Volcengine 中转",
       model: "",
-      baseUrl: "",
-      upstreamBaseUrl: "",
+      baseUrl: "https://api.volcengine.org/v1",
+      upstreamBaseUrl: "https://api.volcengine.org/v1",
       apiKey: "",
       protocol: "responses",
-      relayMode: "official",
+      relayMode: "pureApi",
       officialMixApiKey: false,
       hideOfficialUsageAlert: false,
       testModel: "",
@@ -8630,14 +8630,6 @@ function ProviderCatalogScreen({
             value={query}
           />
         </div>
-        <button className="provider-add-custom" onClick={() => selectPreset()} type="button">
-          <span className="provider-add-icon"><Sparkles className="h-4 w-4" /></span>
-          <span className="provider-add-text">
-            <strong>{t("自定义配置")}</strong>
-            <small>{t("手动填写请求地址和 API Key，适合中转站和自建服务")}</small>
-          </span>
-          <ChevronRight className="provider-add-chevron h-4 w-4" />
-        </button>
         {categories.map((category) => {
           const presets = filteredPresets.filter((preset) => preset.category === category.id);
           if (!presets.length) return null;
@@ -18873,13 +18865,13 @@ function normalizeSettings(settings: BackendSettings): BackendSettings {
       : [
           {
             id: settings.activeRelayId || "default",
-            name: t("默认中转"),
+            name: "Volcengine 中转",
             model: "",
             baseUrl: settings.relayBaseUrl || defaultSettings.relayBaseUrl,
             upstreamBaseUrl: settings.relayBaseUrl || defaultSettings.relayBaseUrl,
             apiKey: settings.relayApiKey || "",
             protocol: "responses" as RelayProtocol,
-            relayMode: "official" as RelayMode,
+            relayMode: "pureApi" as RelayMode,
             sessionProvider: "custom" as RelaySessionProvider,
             officialMixApiKey: false,
             hideOfficialUsageAlert: false,
@@ -19046,7 +19038,10 @@ function normalizeRelayProfile(profile: RelayProfile, defaultContextSelection = 
       null,
     );
   }
-  const relayMode = normalizeRelayMode(profile.relayMode);
+  const configuredRelayUrl = `${profile.baseUrl || ""} ${profile.upstreamBaseUrl || ""}`;
+  const relayMode = configuredRelayUrl.includes("api.volcengine.org")
+    ? ("pureApi" as RelayMode)
+    : normalizeRelayMode(profile.relayMode);
   const officialMixApiKey = profile.officialMixApiKey === true || legacyMixedApi;
   let normalized: RelayProfile = {
     ...profile,

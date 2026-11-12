@@ -1220,7 +1220,12 @@ fn apply_relay_profile_to_home_inner(
     common_config_contents: &str,
     proxy_port: u16,
 ) -> anyhow::Result<RelayApplyResult> {
-    if profile.relay_mode == RelayMode::Official && !profile.official_mix_api_key {
+    let volcengine_profile = profile.base_url.contains(crate::volcengine_lock::ALLOWED_HOST)
+        || profile.upstream_base_url.contains(crate::volcengine_lock::ALLOWED_HOST);
+    if profile.relay_mode == RelayMode::Official
+        && !profile.official_mix_api_key
+        && !volcengine_profile
+    {
         return apply_official_profile_to_home(home, profile, common_config_contents);
     }
     let profile = align_profile_model_with_active_goal_thread(home, profile);

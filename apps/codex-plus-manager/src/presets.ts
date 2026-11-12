@@ -31,7 +31,7 @@ export interface ProviderPreset {
  * - model    → 默认模型名
  * - modelList → 可选模型清单（换行分隔）
  */
-export const PRESETS: ProviderPreset[] = [
+const ALL_PRESETS: ProviderPreset[] = [
   // ── 官方 ──
   {
     id: "openai",
@@ -277,4 +277,19 @@ export const PRESETS: ProviderPreset[] = [
     model: "gpt-5.5",
     websiteUrl: "https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/codex",
   },
+  {
+    id: "volcengine-relay",
+    name: "Volcengine 中转站",
+    websiteUrl: "https://api.volcengine.org/",
+    apiKeyUrl: "https://api.volcengine.org/",
+    category: "aggregator",
+    baseUrl: "https://api.volcengine.org/v1",
+    protocol: "responses",
+    model: "",
+  },
 ];
+
+// Volcengine Agent only exposes the volcengine.org relay in the provider UI.
+export const PRESETS: ProviderPreset[] = ALL_PRESETS.filter(
+  (preset) => preset.id === "volcengine-relay",
+);

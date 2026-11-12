@@ -126,10 +126,15 @@ package_deb() {
     mkdir -p "$stage/share/doc/$PACKAGE_NAME"
     mkdir -p "$DEB_DIR/DEBIAN"
     mkdir -p "$stage/lib/${PACKAGE_NAME}"
+    mkdir -p "$stage/lib/${PACKAGE_NAME}/resources"
 
     # ── 复制二进制 ──
     cp "$REPO_DIR/target/release/codex-plus-plus" "$stage/bin/"
     chmod 755 "$stage/bin/codex-plus-plus"
+    if [ -f "$REPO_DIR/target/release/codex" ]; then
+        cp "$REPO_DIR/target/release/codex" "$stage/lib/${PACKAGE_NAME}/resources/"
+        chmod 755 "$stage/lib/${PACKAGE_NAME}/resources/codex"
+    fi
 
     # ── 复制前端资源 ──
     if [ -d "$PROJECT_DIR/dist" ]; then

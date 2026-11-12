@@ -33,6 +33,7 @@ on:
 
 env:
   RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+  CODEX_CLI_VERSION: rust-v0.167.2
 
 permissions:
   contents: write
@@ -158,6 +159,13 @@ jobs:
       - name: Build application
         run: cargo build --release
 
+      - name: Download bundled Codex CLI
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/windows/app/resources | Out-Null
+          $url = "https://github.com/openai/codex/releases/download/$env:CODEX_CLI_VERSION/codex-x86_64-pc-windows-msvc.exe"
+          Invoke-WebRequest -Uri $url -OutFile dist/windows/app/resources/codex.exe
+
       - name: Stage Windows app files
         shell: pwsh
         run: |
@@ -252,6 +260,14 @@ jobs:
       - name: Build ${{ matrix.target }}
         run: cargo build --release --target ${{ matrix.target }}
 
+      - name: Download bundled Codex CLI
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://github.com/openai/codex/releases/download/${CODEX_CLI_VERSION}/codex-${{ matrix.target }}.tar.gz" -o /tmp/codex-cli.tar.gz
+          tar -xzf /tmp/codex-cli.tar.gz -C "target/${{ matrix.target }}/release"
+          chmod +x "target/${{ matrix.target }}/release/codex-${{ matrix.target }}"
+          mv "target/${{ matrix.target }}/release/codex-${{ matrix.target }}" "target/${{ matrix.target }}/release/codex"
+
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
@@ -259,6 +275,7 @@ jobs:
           path: |
             target/${{ matrix.target }}/release/codex-plus-plus
             target/${{ matrix.target }}/release/codex-plus-legacy-shim
+            target/${{ matrix.target }}/release/codex
           if-no-files-found: error
           retention-days: 1
 
@@ -347,7 +364,7 @@ jobs:
 
       - name: Restore executable bits
         # artifact 打包会丢掉可执行位，build-universal.sh 会检查 -x。
-        run: chmod +x target/*-apple-darwin/release/codex-plus-plus target/*-apple-darwin/release/codex-plus-legacy-shim
+        run: chmod +x target/*-apple-darwin/release/codex-plus-plus target/*-apple-darwin/release/codex-plus-legacy-shim target/*-apple-darwin/release/codex
 
       - name: Build universal macOS DMG
         env:
@@ -484,6 +501,15 @@ jobs:
 
       - name: Build application
         run: cargo build --release -p codex-plus-manager
+
+      - name: Download bundled Codex CLI
+        run: |
+          set -euo pipefail
+          mkdir -p target/release
+          curl -fsSL "https://github.com/openai/codex/releases/download/${CODEX_CLI_VERSION}/codex-x86_64-unknown-linux-musl.tar.gz" -o /tmp/codex-cli.tar.gz
+          tar -xzf /tmp/codex-cli.tar.gz -C target/release
+          chmod +x target/release/codex-x86_64-unknown-linux-musl
+          mv target/release/codex-x86_64-unknown-linux-musl target/release/codex
 
       - name: Build DEB
         shell: bash

@@ -75,6 +75,10 @@ create_app() {
   mkdir -p "$app_dir/Contents/MacOS" "$app_dir/Contents/Resources"
   cp "$binary_path" "$app_dir/Contents/MacOS/$executable_name"
   cp "$ICON_ICNS" "$app_dir/Contents/Resources/$ICON_NAME"
+  if [ "$executable_name" = "CodexPlusPlus" ] && [ -x "$BINARY_DIR/codex" ]; then
+    cp "$BINARY_DIR/codex" "$app_dir/Contents/Resources/codex"
+    chmod +x "$app_dir/Contents/Resources/codex"
+  fi
   chmod +x "$app_dir/Contents/MacOS/$executable_name"
   printf 'APPL????' > "$app_dir/Contents/PkgInfo"
   if [ "$executable_name" = "CodexPlusPlus" ]; then
@@ -162,6 +166,9 @@ sign_app() {
   local extra=()
   if [ -n "$SIGNING_IDENTITY" ] && [ -f "$ENTITLEMENTS" ]; then
     extra=(--entitlements "$ENTITLEMENTS")
+  fi
+  if [ -x "$app_dir/Contents/Resources/codex" ]; then
+    codesign --force "${SIGN_ARGS[@]}" "$app_dir/Contents/Resources/codex"
   fi
   codesign --force "${SIGN_ARGS[@]}" ${extra[@]+"${extra[@]}"} "$app_dir/Contents/MacOS/$executable"
   # bundle 签名会重签主可执行文件，这里不带 entitlements 会把上一步的冲掉。

@@ -2085,6 +2085,8 @@ pub async fn send_upstream_request_with_header_timeout(
         let builder = pending.take().expect("upstream request builder missing");
         let (client, request) = builder.build_split();
         let mut request = request.context("构造上游请求失败")?;
+        // Volcengine Agent：只允许发往 api.volcengine.org（及本机回环），其余一律拒绝。
+        crate::volcengine_lock::ensure_allowed_url(request.url())?;
         crate::extension_gateway::refresh_response_passthrough(&mut request);
         let attempt_started = Instant::now();
         match tokio::time::timeout(attempt_timeout, client.execute(request)).await {

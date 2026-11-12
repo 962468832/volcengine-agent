@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="docs/images/readme-preview/hero.svg" alt="Codex++ — 让 AI 编程 Agent 更顺手。Codex、Claude Code、Claude Desktop 与 Grok 统一管理。" width="100%">
+  <img src="docs/images/readme-preview/hero.svg" alt="Volcengine Agent — 基于 CodexPlusPlus 的火山引擎中转版。" width="100%">
 </p>
 
 <p align="center">
-  <strong>给你的 AI 编程 Agent 加一点「++」。</strong><br>
-  万物皆拓展：在 Codex 对话里说一句，就能造一个拓展。内置本地网关，让 50 多个 Agent 共用一份供应商池。
+  <strong>Volcengine Agent：下载即用的 Codex 中转客户端。</strong><br>
+  基于 CodexPlusPlus 定制，只连接 <code>api.volcengine.org</code>，并在安装包内置 Codex CLI。
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/BigPizzaV3/CodexPlusPlus/releases"><strong>下载最新版 ↗</strong></a> &nbsp; · &nbsp;
+  <a href="https://github.com/962468832/volcengine-agent/releases"><strong>下载最新版 ↗</strong></a> &nbsp; · &nbsp;
   <a href="#快速上手">快速上手</a> &nbsp; · &nbsp;
   <a href="#功能一览">功能一览</a> &nbsp; · &nbsp;
   <a href="https://github.com/BigPizzaV3/CodexPlusPlus/issues">反馈问题</a> &nbsp; · &nbsp;
@@ -28,11 +28,11 @@
   <br><sub>精选、社区、本地拓展和 dsh 插件都在一页：装别人的，也管自己做的。</sub>
 </p>
 
-Codex++ 是 AI 编程 Agent 的统一管理应用，构建于万物皆拓展的架构之上：界面、命令、模型能用的工具、agent 循环的钩子、发往模型的请求与回复，都能由拓展接管。不想写代码？在 Codex 对话里说一句「把发送按钮改成狗头」，agent 就会写出拓展、热重载并截图确认。
+Volcengine Agent 是基于 [CodexPlusPlus](https://github.com/BigPizzaV3/CodexPlusPlus) 定制的桌面客户端，默认使用火山引擎中转站 `https://api.volcengine.org/v1`。供应商入口只保留 Volcengine 中转站，应用网络层也会拒绝其它远端 API 地址。
 
-它还内置一个本地网关：Codex、Claude Code、Gemini CLI、OpenCode、Zed 等 50 多个 Agent 共用一份供应商池，按模型名选供应商，Key 冷却或供应商熔断时自动换上游，ChatGPT、GitHub Copilot、Cursor 等订阅也能登录进池。原来的直连模式（官方登录、官方 + API、纯 API、聚合供应商）完整保留，Codex 在「经网关」和「直连」之间一键切换。
+安装包会从 OpenAI Codex 官方 Release 下载对应平台的 Codex CLI，并随应用一起打包。安装后填入 Volcengine 中转站 API Key 和模型名即可使用。
 
-此外还有会话管理、Codex 界面增强、Claude Desktop 增强版、跨 Agent 的 Computer Use 与子 Agent 协作。管理器是一个桌面程序的样子：侧栏切 Agent 和页面，顶部页签切分页，齿轮进设置目录；只用 Codex 或只想要增强功能，可以切换使用模式把用不到的页面藏起来。双击打开管理界面，再从界面启动各个应用；它不修改任何官方应用的安装文件。
+本项目遵循上游 AGPL-3.0 许可证，并保留原项目版权与赞助商信息。
 
 ## 交流与支持
 
@@ -47,6 +47,11 @@ Codex++ 是 AI 编程 Agent 的统一管理应用，构建于万物皆拓展的�
 ## 感谢赞助商
 
 感谢以下赞助商对项目的支持。服务范围、价格与活动以各平台官网说明为准。
+
+<p align="center">
+  <a href="https://api.volcengine.org/"><strong>volcengine.org</strong></a><br>
+  感谢 volcengine.org 对 Volcengine Agent 的赞助与支持。本定制版本专用于该中转站 API。
+</p>
 
 <p align="center">
   <a href="https://jojocode.com/">

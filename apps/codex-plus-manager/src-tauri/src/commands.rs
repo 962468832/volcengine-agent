@@ -4467,6 +4467,14 @@ pub fn find_desktop_codex_cli() -> CommandResult<Value> {
     // 因此这里不再返回包内路径，避免把必然失败的路径写进设置。
     #[cfg(windows)]
     {
+        if let Some(path) = codex_plus_core::app_paths::find_packaged_codex_cli()
+            .filter(|candidate| codex_cli_can_start(candidate))
+        {
+            return ok(
+                "已使用 Volcengine Agent 内置 Codex CLI。",
+                json!({ "path": path.to_string_lossy() }),
+            );
+        }
         return match codex_plus_core::app_paths::find_desktop_managed_codex_cli() {
             Some(path) => ok(
                 "已填入桌面版内置 Codex CLI。",
@@ -4498,9 +4506,10 @@ pub fn find_desktop_codex_cli() -> CommandResult<Value> {
         };
         // 包内 CLI 可能存在于受系统保护的目录而无法执行（#2028 同类问题），
         // 因此先验证能真正启动，失败时回退到用户目录中的独立 CLI。
+        let packaged = codex_plus_core::app_paths::find_packaged_codex_cli();
         let bundled = codex_plus_core::app_paths::find_bundled_codex_cli(&app_dir);
         let standalone = codex_plus_core::app_paths::find_standalone_codex_cli();
-        let Some(path) = [bundled, standalone]
+        let Some(path) = [packaged, bundled, standalone]
             .into_iter()
             .flatten()
             .find(|candidate| codex_cli_can_start(candidate))

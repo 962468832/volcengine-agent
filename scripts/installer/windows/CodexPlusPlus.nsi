@@ -99,6 +99,8 @@ Section "Install"
     Abort
   legacy_binary_removed:
   File "${ROOT}\dist\windows\app\codex-plus-plus.exe"
+  SetOutPath "$INSTDIR\resources"
+  File "${ROOT}\dist\windows\app\resources\codex.exe"
 
   ; 只迁移确实存在的桌面入口，用户删掉的入口在升级时仍不补建（issue #2376）。
   StrCpy $HadDesktopEntry 0
@@ -185,6 +187,8 @@ Section "Uninstall"
 
   Delete "$INSTDIR\codex-plus-plus.exe"
   Delete "$INSTDIR\codex-plus-plus-manager.exe"
+  Delete "$INSTDIR\resources\codex.exe"
+  RMDir "$INSTDIR\resources"
 
   ; NSIS 的 Delete 遇到被占用文件会静默失败，用户会误以为卸载干净。
   ; 残留检测提示用户先从托盘退出，避免“卸载后重装”继续失败（issue #2362）。
