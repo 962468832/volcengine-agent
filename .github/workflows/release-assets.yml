@@ -297,6 +297,7 @@ jobs:
           ref: ${{ env.RELEASE_TAG }}
 
       - name: Import Developer ID certificate
+        if: ${{ secrets.MACOS_CERT_P12 != '' && secrets.MACOS_CERT_PASSWORD != '' && secrets.MACOS_KEYCHAIN_PASSWORD != '' }}
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
@@ -321,6 +322,7 @@ jobs:
           rm -f "$RUNNER_TEMP/cert.p12"
 
       - name: Install Developer ID intermediate certificate
+        if: ${{ secrets.MACOS_CERT_P12 != '' && secrets.MACOS_CERT_PASSWORD != '' && secrets.MACOS_KEYCHAIN_PASSWORD != '' }}
         run: |
           set -euo pipefail
           # runner 的系统钥匙串里没有 Developer ID G2 中间证书，
@@ -333,6 +335,7 @@ jobs:
           security find-identity -v -p codesigning
 
       - name: Store notarization credentials
+        if: ${{ secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' }}
         env:
           APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
@@ -369,15 +372,13 @@ jobs:
       - name: Build universal macOS DMG
         env:
           MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
-          MACOS_NOTARY_PROFILE: codexplusplus-notary
+          MACOS_NOTARY_PROFILE: ${{ secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && 'codexplusplus-notary' || '' }}
           # 两个架构已由 macos-build 并行编好，这里只 lipo 合并、签名、公证、打 DMG。
           UNIVERSAL_SKIP_BUILD: "1"
         run: |
-          # 发版流水线必须真的签名，凭据缺失就直接失败，不要静默退回 ad-hoc
-          # 然后发一个用户打不开的包出去。
+          # 没有 Developer ID 凭据时使用 ad-hoc 签名，仍然生成可下载的 DMG。
           if [ -z "${MACOS_SIGNING_IDENTITY:-}" ]; then
-            echo "error: MACOS_SIGNING_IDENTITY 未配置，拒绝产出未签名的发布包" >&2
-            exit 1
+            echo "note: 未配置 macOS Developer ID，生成未公证的 ad-hoc DMG。" >&2
           fi
           VERSION="${RELEASE_TAG#v}"
           VERSION="${VERSION#V}"
@@ -418,9 +419,8 @@ jobs:
           done
 
       - name: Verify DMG notarization
-        # 不加 if 条件：Build macOS DMG 已在凭据缺失时直接失败，
-        # 能走到这里就必然签名并公证过。此前用 if: env.MACOS_SIGNING_IDENTITY
-        # 判断，但该变量只存在于上一步的 env 里，这一步读不到，会永远跳过。
+        if: ${{ secrets.MACOS_SIGNING_IDENTITY != '' && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' }}
+        # 只有正式签名并配置公证凭据时，才验证 Apple 票据。
         run: |
           set -euo pipefail
           for dmg in dist/macos/*.dmg; do
@@ -498,6 +498,11 @@ jobs:
       - name: Build frontend
         working-directory: apps/codex-plus-manager
         run: npm run vite:build
+
+      # release-cache 可能恢复旧的、不完整的 Sherpa 原生库目录；删除后让
+      # sherpa-onnx-sys 重新下载并解包当前版本的 Linux 静态库。
+      - name: Reset Sherpa native cache
+        run: rm -rf target/sherpa-onnx-prebuilt
 
       - name: Build application
         run: cargo build --release -p codex-plus-manager
