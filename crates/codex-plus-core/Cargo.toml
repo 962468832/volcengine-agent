@@ -72,6 +72,12 @@ windows = { version = "0.58", features = [
   "Win32_UI_WindowsAndMessaging",
 ] }
 
+[features]
+# 仅供测试：关闭 Volcengine 上游锁，让上游原有用例（用假主机名做上游）照常运行。
+# 发布构建不会打开它；只有下面的自引用 dev-dependency 在 `cargo test` 时打开。
+upstream-unlocked = []
+
 [dev-dependencies]
+codex-plus-core = { path = ".", features = ["upstream-unlocked"] }
 tempfile.workspace = true
 wiremock = "0.6"

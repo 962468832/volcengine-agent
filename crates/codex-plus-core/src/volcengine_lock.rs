@@ -43,8 +43,22 @@ pub fn is_allowed_base_url(base_url: &str) -> bool {
     reqwest::Url::parse(trimmed).is_ok_and(|url| is_allowed_url(&url))
 }
 
+/// 锁是否生效。发布构建恒为 true；只有测试时打开 `upstream-unlocked` 才关闭，
+/// 供上游原有用例使用假主机名。允许名单本身（[`is_allowed_url`] 等）不受影响。
+pub const fn enforced() -> bool {
+    !cfg!(feature = "upstream-unlocked")
+}
+
 /// 网络层闸门：不在允许名单就报错，不发请求。
 pub fn ensure_allowed_url(url: &reqwest::Url) -> anyhow::Result<()> {
+    if !enforced() {
+        return Ok(());
+    }
+    check_allowed_url(url)
+}
+
+/// 不看 [`enforced`] 的纯校验，供闸门和测试使用。
+pub fn check_allowed_url(url: &reqwest::Url) -> anyhow::Result<()> {
     if is_allowed_url(url) {
         return Ok(());
     }
@@ -88,6 +102,13 @@ mod tests {
         assert!(!is_allowed_url(&url("http://api.volcengine.org/v1")));
         assert!(!is_allowed_url(&url("https://api.volcengine.org:8443/v1")));
         assert!(!is_allowed_url(&url("https://user@evil.com@api.volcengine.org.evil.com/")));
+    }
+
+    #[test]
+    fn check_rejects_foreign_hosts_with_a_clear_error() {
+        assert!(check_allowed_url(&url("https://api.volcengine.org/v1/responses")).is_ok());
+        let error = check_allowed_url(&url("https://api.openai.com/v1")).unwrap_err();
+        assert!(error.to_string().contains("api.openai.com"));
     }
 
     #[test]

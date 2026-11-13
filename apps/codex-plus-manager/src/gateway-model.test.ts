@@ -455,9 +455,14 @@ test("内置预设：厂商在前、中转其次、本机最后；来源或地�
   assert.equal(sections.indexOf("local") > sections.lastIndexOf("relay"), true);
   const anthropic = presets.find((preset) => preset.key === "anthropic")!;
   assert.equal(anthropic.protocol, "anthropicMessages");
-  const deepseek = presets.find((preset) => preset.key === "deepseek")!;
-  assert.equal(deepseek.section, "vendor");
-  assert.equal(presetAdded(payload(), deepseek), true, "末尾斜杠和大小写不影响判断");
+  // Volcengine Agent：共享预设只剩 volcengine.org 中转，归在中转组。
+  const volcengine = presets.find((preset) => preset.key === "volcengine-relay")!;
+  assert.equal(volcengine.section, "relay");
+  assert.equal(presets.some((preset) => preset.key === "deepseek"), false);
+  const withVolcengine = payload();
+  withVolcengine.pool[0].baseUrl = "HTTPS://API.VOLCENGINE.ORG/v1/";
+  assert.equal(presetAdded(withVolcengine, volcengine), true, "末尾斜杠和大小写不影响判断");
+  assert.equal(presetAdded(payload(), volcengine), false);
   assert.equal(presetAdded(payload(), anthropic), false);
   const data = payload();
   data.pool[2].source = "preset:anthropic";
@@ -613,22 +618,16 @@ test("普通供应商的价格与代理在详情里编辑，官方账号可在�
   assert.match(extras, /placeholder="http:\/\/127\.0\.0\.1:7890"/);
 });
 
-test("赞助商单独一组放在「添加供应商」最前面，不再混在中转里", () => {
+test("Volcengine Agent 不展示赞助商预设，中转组只有 volcengine.org 和网关自带项", () => {
   const presets = gatewayPresets(new Date(2026, 9, 26));
-  const sponsors = presets.filter((preset) => preset.section === "sponsor").map((preset) => preset.key);
-  assert.deepEqual(sponsors, ["jojocode-max", "runapi", "apikeyfun", "cccccc-api", "tokenmy"]);
-  // 到期日当天仍显示，第二天起从目录里去掉。
-  const keys = (date: Date) => gatewayPresets(date).map((preset) => preset.key);
-  assert.ok(keys(new Date(2026, 11, 7)).includes("runapi"));
-  assert.ok(!keys(new Date(2026, 11, 8)).includes("runapi"));
-  assert.ok(keys(new Date(2026, 10, 20)).includes("tokenmy"));
-  assert.ok(!keys(new Date(2026, 10, 21)).includes("tokenmy"));
-  assert.deepEqual(activeSponsorIds(new Date(2026, 10, 23)), ["jojocode-max", "runapi", "cccccc-api"]);
-  assert.deepEqual(activeSponsorIds(new Date(2026, 11, 2)), ["jojocode-max", "runapi"]);
-  for (const gone of ["pateway", "therouter", "shengsuanyun", "ccsub"]) assert.ok(!keys(new Date(2026, 9, 26)).includes(gone), gone);
-  assert.equal(presets[0].section, "sponsor");
+  assert.deepEqual(presets.filter((preset) => preset.section === "sponsor"), []);
+  for (const gone of ["jojocode-max", "runapi", "apikeyfun", "cccccc-api", "tokenmy", "openrouter", "siliconflow"]) {
+    assert.ok(!presets.some((preset) => preset.key === gone), gone);
+  }
   const relays = presets.filter((preset) => preset.section === "relay").map((preset) => preset.key);
-  assert.ok(relays.includes("openrouter") && relays.includes("siliconflow") && relays.includes("opencode-go"));
+  assert.ok(relays.includes("volcengine-relay"));
+  // 赞助商名单逻辑本身保留（上游代码），只是不再有对应的共享预设。
+  assert.deepEqual(activeSponsorIds(new Date(2026, 11, 2)), ["jojocode-max", "runapi"]);
   const catalog = readFileSync(new URL("./GatewayProviders.tsx", import.meta.url), "utf8");
   assert.ok(catalog.indexOf('key: "sponsor"') < catalog.indexOf('key: "subscription"'));
 });

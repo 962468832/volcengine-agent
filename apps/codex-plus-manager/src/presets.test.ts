@@ -1,11 +1,20 @@
 import assert from "node:assert";
 import { describe, it, test } from "node:test";
-import { PRESETS } from "./presets.ts";
+import { ALL_PRESETS, PRESETS } from "./presets.ts";
 
 describe("provider presets", () => {
+  it("Volcengine Agent only exposes the volcengine.org relay", () => {
+    assert.deepStrictEqual(PRESETS.map((preset) => preset.id), ["volcengine-relay"]);
+    const [preset] = PRESETS;
+    assert.equal(preset.baseUrl, "https://api.volcengine.org/v1");
+    assert.equal(preset.protocol, "responses");
+  });
+
+  // 以下用例校验上游完整预设数据（ALL_PRESETS），方便合并上游时发现改动。
+
   it("keeps MiniMax China and global credentials in separate presets", () => {
-    const china = PRESETS.find((preset) => preset.id === "minimax");
-    const global = PRESETS.find((preset) => preset.id === "minimax-global");
+    const china = ALL_PRESETS.find((preset) => preset.id === "minimax");
+    const global = ALL_PRESETS.find((preset) => preset.id === "minimax-global");
 
     assert.deepStrictEqual(china, {
       id: "minimax",
@@ -33,7 +42,7 @@ describe("provider presets", () => {
   });
 
 test("DeepSeek preset uses the official Responses integration", () => {
-  const preset = PRESETS.find((candidate) => candidate.id === "deepseek");
+  const preset = ALL_PRESETS.find((candidate) => candidate.id === "deepseek");
   assert.ok(preset);
   assert.equal(preset.baseUrl, "https://api.deepseek.com/");
   assert.equal(preset.protocol, "responses");
@@ -43,11 +52,11 @@ test("DeepSeek preset uses the official Responses integration", () => {
 
 // GrooRoute 赞助已于 2026-10-15 到期：预设与推广链接一并下线。
 test("expired GrooRoute sponsor preset is removed", () => {
-  assert.equal(PRESETS.some((candidate) => candidate.id === "grooroute"), false);
+  assert.equal(ALL_PRESETS.some((candidate) => candidate.id === "grooroute"), false);
 });
 
 test("RunAPI preset uses the current v1 Base URL", () => {
-  const preset = PRESETS.find((candidate) => candidate.id === "runapi");
+  const preset = ALL_PRESETS.find((candidate) => candidate.id === "runapi");
   assert.ok(preset);
   assert.equal(preset.baseUrl, "https://runapi.host/v1");
   assert.equal(preset.protocol, "responses");

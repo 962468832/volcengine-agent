@@ -31,7 +31,7 @@ export interface ProviderPreset {
  * - model    → 默认模型名
  * - modelList → 可选模型清单（换行分隔）
  */
-const ALL_PRESETS: ProviderPreset[] = [
+export const ALL_PRESETS: ProviderPreset[] = [
   // ── 官方 ──
   {
     id: "openai",

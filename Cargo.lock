@@ -537,6 +537,7 @@ dependencies = [
  "base64 0.22.1",
  "block2",
  "claude-local",
+ "codex-plus-core",
  "directories",
  "ecb",
  "flate2",
